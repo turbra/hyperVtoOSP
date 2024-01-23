@@ -23,20 +23,25 @@ This guide outlines the process for migrating a virtual machine (VM) from Micros
 
 ## Detailed Steps
 
-### Windows Team - Preparation
-### 1. Download the virtio-win driver iso and run the install MSI in the VM being migrated.
-- ![Splash Screen](https://github.com/gprocunier/hyperVtoOSP/blob/main/images/virtio-win-install.png?raw=true)
-- Select the default options for the driver components and select YES when the unsigned driver prompt appears.  Please see the unsigned public repo information available here: https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/README.md#virtio-win-driver-signatures
-- ![Unsigned install](https://github.com/gprocunier/hyperVtoOSP/blob/main/images/virtio-win-unsigned.png?raw=true)
+### Windows Team - Prep-work
 
-### 2. Download the cloudbase-init install msi and run it in the VM being migrated.
-- ![Splash Screen](https://github.com/gprocunier/hyperVtoOSP/blob/main/images/cloudbase-install.png?raw=true)
-- ![Service Configuration](https://github.com/gprocunier/hyperVtoOSP/blob/main/images/cloudbase-config.png?raw=true)
-- This configures the user that cloudbase-init will install and use.  The purpose of this account is to create control linkage between OpenStack and the windows instance to provide first-time-boot configuration "as required".
-- ![Installation Finish](https://github.com/gprocunier/hyperVtoOSP/blob/main/images/cloudbase-finish.png?raw=true)
-- If the VM is going to be used as a general purpose template for subsequent VMs then both sysprep and shutdown after installation should be selected.  If the vm is just being migrated as-is then both can be left unchecked.
+- [Certified Guest Operating Systems in Red Hat OpenStack Platform](https://access.redhat.com/articles/973163)
+- Note down the MAC addresses of the NICs the IP and the VLAN of the VM.
+- Install drivers in the VM prior to export. Refer to the [virtio-win drivers installation guide](https://github.com/virtio-win/virtio-win-pkg-scripts/blob/master/README.md).
+- Install the cloud-init agent for Windows. Instructions can be found at the [Cloudbase cloud-init for Windows page](https://github.com/cloudbase/cloudbase-init).
 
-### 3. Record the VM NIC MAC / IP / VLANs, denote which one is the primary nic
+### Windows Team - Steps to install drivers
+### 1. Placeholder
+- placeholder
+- placeholder
+
+### 2. Placeholder
+- placeholder
+- placeholder
+
+### 3. Placeholder
+- placeholder
+- placeholder
 
 ### Windows Team - Steps to export the VM Disk
 ### 1. Export the VM Disk from Hyper-V
@@ -48,29 +53,28 @@ This guide outlines the process for migrating a virtual machine (VM) from Micros
 ```bash
 Export-VM -Name \<vm name\> -Path \<path\>
 ```
+### Unix Team - 2. Convert the VM Disk to a Compatible Format
 
-### Unix Team - 1. Convert the VM Disk to a Compatible Format
-
-- Use `qemu-img` or similar tool to convert the VM disk to a RAW format.
+- Use `qemu-img` or similar tool to convert the VM disk to a QCOW2 format.
 
   ```bash
-  qemu-img convert -p -f vhdx -O raw source.vhdx destination.raw
+  qemu-img convert -f vpc -O qcow2 source.vhdx destination.qcow2
   ```
 
-### Unix Team - 2. Upload the Converted Image to OpenStack
+### Unix Team - Upload the Converted Image to OpenStack
 
 - Use the OpenStack CLI or Horizon dashboard to upload the QCOW2 image.
 
   ```bash
-  openstack image create "VM_Name" --file destination.qcow2 --disk-format raw --container-format bare --public
+  openstack image create "VM_Name" --file destination.qcow2 --disk-format qcow2 --container-format bare --public
   ```
 
-### Unix Team - 3. Create a New Instance in OpenStack Using the Uploaded Image
+### Unix Team - Create a New Instance in OpenStack Using the Uploaded Image
 
 - Launch a new instance in OpenStack using the uploaded image.
 
   ```bash
-  openstack server create --image VM_Name --flavor b1.medium --network private_network VM_Instance_Name
+  openstack server create --image VM_Name --flavor m1.medium --network private_network VM_Instance_Name
   ```
 
 ### Additional Resources for Windows Instances and Cloud Init
@@ -83,4 +87,4 @@ Export-VM -Name \<vm name\> -Path \<path\>
 
 ## Troubleshooting
 
-- Ensure `virtio` drivers and cloudbase-init are correctly installed for proper functionality.
+- Ensure `virtio` drivers and cloud-init are correctly installed for proper functionality.
